@@ -71,6 +71,15 @@ fetch(
       .attr("id", "y-axis")
       .call(yAxis);
 
+    // y axis label
+    svg
+      .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", padding + 20)
+      .attr("x", -height / 2)
+      .style("text-anchor", "middle")
+      .text("Time in Minutes");
+
     const tooltip = d3
       .select("body")
       .append("div")
