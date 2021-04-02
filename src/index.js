@@ -30,8 +30,8 @@ fetch(
     const xScale = d3
       .scaleTime()
       .domain([
-        d3.min(dataSet, (d) => new Date(d.Year, 0, 0, 0, 0, 0)),
-        d3.max(dataSet, (d) => new Date(d.Year, 0, 0, 0, 0, 0)),
+        d3.min(dataSet, (d) => new Date(d.Year - 1, 0, 0, 0, 0, 0)),
+        d3.max(dataSet, (d) => new Date(d.Year + 1, 0, 1, 0, 0, 0)),
       ])
       .range([padding, width - padding]);
 
@@ -89,8 +89,7 @@ fetch(
       .attr("data-xvalue", (d) => new Date(d.Year, 0, 0, 0, 0, 0))
       .attr("data-yvalue", (d) => new Date(convertToMillis(d.Time)))
       .attr("class", (d) => (d.Doping ? "doping dot" : "no-doping dot"))
-      .on("mouseover", (e, d) => {
-        d3.select(this).transition().duration("50").attr("opacity", ".85");
+      .on("mousemove", (e, d) => {
         tooltip
           .html(generateTooltipHtml(d))
           .style("left", `${e.screenX}px`)
