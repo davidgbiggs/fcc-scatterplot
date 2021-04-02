@@ -24,22 +24,35 @@ fetch(
     return res.json();
   })
   .then((response) => {
-    const dataSet = response;
-    console.log(response);
+    const svg = d3
+      .select("#svg-container")
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height);
 
+    // attach x axis
     const xScale = d3
       .scaleTime()
       .domain([
-        d3.min(dataSet, (d) => new Date(d.Year - 1, 0, 0, 0, 0, 0)),
-        d3.max(dataSet, (d) => new Date(d.Year + 1, 0, 1, 0, 0, 0)),
+        d3.min(response, (d) => new Date(d.Year - 1, 0, 0, 0, 0, 0)),
+        d3.max(response, (d) => new Date(d.Year + 1, 0, 1, 0, 0, 0)),
       ])
       .range([padding, width - padding]);
 
+    const xAxis = d3.axisBottom(xScale);
+
+    svg
+      .append("g")
+      .attr("transform", `translate(0, ${height - padding})`)
+      .attr("id", "x-axis")
+      .call(xAxis);
+
+    // attach y axis
     const yScale = d3
       .scaleTime()
       .domain([
-        d3.max(dataSet, (d) => new Date(convertToMillis(d.Time))),
-        d3.min(dataSet, (d) => new Date(convertToMillis(d.Time))),
+        d3.max(response, (d) => new Date(convertToMillis(d.Time))),
+        d3.min(response, (d) => new Date(convertToMillis(d.Time))),
       ])
       .range([height - padding, padding]);
 
@@ -51,15 +64,12 @@ fetch(
         return formattedTime;
       }
     });
-    const xAxis = d3.axisBottom(xScale);
 
-    console.log(new Date(convertToMillis("37:00") - new Date(0)));
-
-    const svg = d3
-      .select("#svg-container")
-      .append("svg")
-      .attr("width", width)
-      .attr("height", height);
+    svg
+      .append("g")
+      .attr("transform", `translate(${padding}, 0)`)
+      .attr("id", "y-axis")
+      .call(yAxis);
 
     const tooltip = d3
       .select("body")
@@ -78,14 +88,14 @@ fetch(
 
     svg
       .selectAll("circle")
-      .data(dataSet)
+      .data(response)
       .enter()
       .append("circle")
       .attr("cy", (d) => {
         return yScale(new Date(convertToMillis(d.Time)));
       })
       .attr("cx", (d) => xScale(new Date(d.Year, 0, 0, 0, 0, 0)))
-      .attr("r", "7.5px")
+      .attr("r", "6px")
       .attr("data-xvalue", (d) => new Date(d.Year, 0, 0, 0, 0, 0))
       .attr("data-yvalue", (d) => new Date(convertToMillis(d.Time)))
       .attr("class", (d) => (d.Doping ? "doping dot" : "no-doping dot"))
@@ -103,16 +113,4 @@ fetch(
         tooltip.transition().duration("50").style("opacity", 0);
       })
       .html("<div>No Doping Allegations</div><div>Doping Allegations</div>");
-
-    svg
-      .append("g")
-      .attr("transform", `translate(${padding}, 0)`)
-      .attr("id", "y-axis")
-      .call(yAxis);
-
-    svg
-      .append("g")
-      .attr("transform", `translate(0, ${height - padding})`)
-      .attr("id", "x-axis")
-      .call(xAxis);
   });
